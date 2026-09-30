@@ -1,0 +1,21 @@
+{
+  "name": "PriceHail Navy",
+  "dataColors": ["#1F4E79", "#5B9BD5", "#D6DCE4"],
+  "foreground": "#1B1B1B",
+  "foregroundNeutralSecondary": "#5A5A5A",
+  "background": "#FFFFFF",
+  "backgroundLight": "#F5F7FA",
+  "tableAccent": "#1F4E79",
+  "good": "#1F4E79",
+  "neutral": "#5B9BD5",
+  "bad": "#6B7C8A",
+  "maximum": "#1F4E79",
+  "center": "#5B9BD5",
+  "minimum": "#D6DCE4",
+  "textClasses": {
+    "callout": { "fontSize": 28, "fontFace": "Segoe UI Semibold", "color": "#1F4E79" },
+    "title": { "fontSize": 14, "fontFace": "Segoe UI Semibold", "color": "#1F4E79" },
+    "header": { "fontSize": 12, "fontFace": "Segoe UI Semibold", "color": "#1B1B1B" },
+    "label": { "fontSize": 10, "fontFace": "Segoe UI", "color": "#1B1B1B" }
+  }
+}
