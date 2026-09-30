@@ -1,0 +1,103 @@
+// Power BI measures for the NYC HVFHV star schema
+// Import tables from data/powerbi/*.parquet then paste these into the model.
+
+// --- Core KPIs ---
+Total Revenue = SUM ( fact_zone_hour[revenue] )
+
+Trips = SUM ( fact_zone_hour[trips] )
+
+Driver Pay = SUM ( fact_zone_hour[driver_pay] )
+
+Revenue per Trip =
+DIVIDE ( [Total Revenue], [Trips] )
+
+// Platform take using totals (not average of averages)
+Take Rate =
+1 - DIVIDE ( [Driver Pay], [Total Revenue] )
+
+Avg Wait Minutes =
+AVERAGE ( fact_zone_hour[avg_wait_minutes] )
+
+// --- Time intelligence (MoM works with Q1; YoY needs another year of data) ---
+MoM % =
+VAR _prev =
+    CALCULATE ( [Total Revenue], DATEADD ( dim_date[date_key], -1, MONTH ) )
+RETURN
+    DIVIDE ( [Total Revenue] - _prev, _prev )
+
+YoY % =
+VAR _prev =
+    CALCULATE ( [Total Revenue], DATEADD ( dim_date[date_key], -1, YEAR ) )
+RETURN
+    DIVIDE ( [Total Revenue] - _prev, _prev )
+
+// --- Forecast ---
+Forecast Trips = SUM ( fact_forecast[pred_lgb] )
+
+Actual Forecast Grain = SUM ( fact_forecast[actual_trips] )
+
+Forecast Variance % =
+DIVIDE ( [Actual Forecast Grain] - [Forecast Trips], [Forecast Trips] )
+
+MAPE =
+AVERAGEX (
+    fact_forecast,
+    DIVIDE (
+        ABS ( fact_forecast[actual_trips] - fact_forecast[pred_lgb] ),
+        MAX ( fact_forecast[actual_trips], 0.000001 )
+    )
+)
+
+// --- Ranking ---
+Zone Rank Revenue =
+RANKX (
+    ALL ( dim_zone[zone_name] ),
+    [Total Revenue],
+    ,
+    DESC,
+    DENSE
+)
+
+// --- Weather ---
+Rain Uplift % =
+VAR _rain =
+    CALCULATE ( [Trips], fact_zone_hour[is_rain] = TRUE () )
+VAR _dry =
+    CALCULATE ( [Trips], fact_zone_hour[is_rain] = FALSE () )
+VAR _nRain =
+    CALCULATE ( COUNTROWS ( fact_zone_hour ), fact_zone_hour[is_rain] = TRUE () )
+VAR _nDry =
+    CALCULATE ( COUNTROWS ( fact_zone_hour ), fact_zone_hour[is_rain] = FALSE () )
+RETURN
+    DIVIDE ( DIVIDE ( _rain, _nRain ), DIVIDE ( _dry, _nDry ) ) - 1
+
+Is Peak Hour =
+IF ( [Trips] >= CALCULATE ( PERCENTILEX.INC ( ALLSELECTED ( fact_zone_hour ), [Trips], 0.9 ) ), 1, 0 )
+
+Peak Hour Flag =
+IF (
+    SELECTEDVALUE ( fact_zone_hour[is_rush_hour] ) = TRUE (),
+    "Rush",
+    "Off-peak"
+)
+
+// --- Repositioning what-if ---
+// Create a What-If parameter DriversToSend (1 to 200, step 5) named 'Drivers To Send'
+// Then:
+Allocated Drivers =
+SUM ( fact_reposition_recommendations[drivers_sent] )
+
+Est Extra Trips =
+SUM ( fact_reposition_recommendations[est_extra_trips] )
+
+Est Extra Revenue =
+SUM ( fact_reposition_recommendations[est_extra_revenue] )
+
+// Scale stored X=50 recommendations linearly as a simple what-if (transparent, not a re-solver)
+Uplift Scaled to Parameter =
+VAR _x = SELECTEDVALUE ( 'Drivers To Send'[Drivers To Send], 50 )
+RETURN
+    [Est Extra Revenue] * DIVIDE ( _x, 50 )
+
+Gap Demand Supply =
+SUM ( fact_reposition_recommendations[gap] )

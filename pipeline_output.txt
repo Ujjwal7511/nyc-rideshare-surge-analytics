@@ -1,0 +1,22 @@
+﻿python : Traceback (most recent call last):
+At line:1 char:1
++ python src/run_pipeline.py 2>&1 | Out-File -Encoding utf8 pipeline_ou ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last) 
+   ::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\subha\OneDrive\Desktop\price_hail\src\run_pipeline.py", line 
+102, in <module>
+    main(args.stop_after)
+    ~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\subha\OneDrive\Desktop\price_hail\src\run_pipeline.py", line 
+26, in main
+    from src import ingest
+  File "C:\Users\subha\OneDrive\Desktop\price_hail\src\ingest.py", line 30, in 
+<module>
+    from src.db import connect
+  File "C:\Users\subha\OneDrive\Desktop\price_hail\src\db.py", line 7, in 
+<module>
+    import duckdb
+ModuleNotFoundError: No module named 'duckdb'

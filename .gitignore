@@ -1,0 +1,27 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.env
+*.log
+
+# Large raw/processed data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/powerbi/.gitkeep
+data/powerbi/*.csv
+data/powerbi/*.parquet
+!data/powerbi/.gitkeep
+
+# DuckDB warehouse
+*.duckdb
+*.duckdb.wal
+
+# Keep figures metadata but ignore huge binaries if needed
+# reports/figures/*.png is committed when small enough
